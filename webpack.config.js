@@ -21,26 +21,14 @@ function getEntry() {
   return entry;
 }
 
-// const autoWebPlugin = new AutoWebPlugin("./src/page/", {
-//   ignorePages: ["ignore"],
-//   template: "./src/template.html",
-//   outputPagemap: true,
-//   filename: function(pageName) {
-//     return pageName;
-//   },
-//   commonsChunk: {
-//     name: "common"
-//   }
-// });
-
 module.exports = {
   mode: "development",
   entry: getEntry(),
   // entry: autoWebPlugin.entry({}),
   output: {
     filename: "[name]/js/[name]-[contenthash:8].js",
-    path: path.resolve(__dirname, "./dist/html"),
-    chunkFilename: "common/common-[contenthash].js"
+    path: path.resolve(__dirname, "./dist/"),
+    chunkFilename: "vendors/[name]-[contenthash].js"
   },
   module: {
     rules: [
@@ -104,7 +92,7 @@ module.exports = {
       //   chunkFilename: "[id].css",
       //   ignoreOrder: false // Enable to remove warnings about conflicting order
     }),
-    new webpack.SourceMapDevToolPlugin({})
+    // new webpack.SourceMapDevToolPlugin({})
     // new HtmlWebpackPlugin(),
     // new HtmlWebpackPlugin({
     //   // Also generate a test.html
@@ -115,15 +103,17 @@ module.exports = {
 };
 
 // 获取html-webpack-plugin参数的方法
-var getHtmlConfig = function(name, chunks) {
+var getHtmlConfig = function(name, chunks,excludeChunks) {
   return {
     template: `src/assets/template.html`,
     filename: `${name}.html`,
     // favicon: './favicon.ico',
     // title: title,
     inject: true,
-    hash: true, //开启hash  ?[hash]
-    chunks: chunks,
+    // hash: true, //开启hash  ?[hash]
+    // chunks,
+  chunks:['test'],
+    // excludeChunks,
     minify:
       process.env.NODE_ENV === "development"
         ? false
@@ -142,13 +132,13 @@ Object.keys(entryObj).forEach(element => {
   htmlArray.push({
     _html: element,
     title: "",
-    chunks: ["vendor", element]
+    excludeChunks: Object.keys(entryObj).filter(filename=>filename!=element)
   });
 });
 
 //自动生成html模板
 htmlArray.forEach(element => {
   module.exports.plugins.push(
-    new HtmlWebpackPlugin(getHtmlConfig(element._html, element.chunks))
+    new HtmlWebpackPlugin(getHtmlConfig(element._html, element.chunks,element.excludeChunks))
   );
 });
