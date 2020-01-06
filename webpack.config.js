@@ -74,6 +74,8 @@ module.exports = {
       cacheGroups: {
         vendors: {
           test: /[\\/]node_modules[\\/]/,
+          // chunks: "initial",
+          // name: "vendor", // 打包后的文件名，任意命名
           priority: -10
         },
         default: {
@@ -91,7 +93,7 @@ module.exports = {
       filename: "[name]/css/[name]-[contenthash:8].css"
       //   chunkFilename: "[id].css",
       //   ignoreOrder: false // Enable to remove warnings about conflicting order
-    }),
+    })
     // new webpack.SourceMapDevToolPlugin({})
     // new HtmlWebpackPlugin(),
     // new HtmlWebpackPlugin({
@@ -103,7 +105,7 @@ module.exports = {
 };
 
 // 获取html-webpack-plugin参数的方法
-var getHtmlConfig = function(name, chunks,excludeChunks) {
+var getHtmlConfig = function(name, chunks, excludeChunks) {
   return {
     template: `src/assets/template.html`,
     filename: `${name}.html`,
@@ -111,9 +113,9 @@ var getHtmlConfig = function(name, chunks,excludeChunks) {
     // title: title,
     inject: true,
     // hash: true, //开启hash  ?[hash]
-    // chunks,
-  chunks:['test'],
-    // excludeChunks,
+    chunks,
+    // chunks: ["test"],
+    excludeChunks,
     minify:
       process.env.NODE_ENV === "development"
         ? false
@@ -132,13 +134,15 @@ Object.keys(entryObj).forEach(element => {
   htmlArray.push({
     _html: element,
     title: "",
-    excludeChunks: Object.keys(entryObj).filter(filename=>filename!=element)
+    excludeChunks: Object.keys(entryObj).filter(filename => filename != element)
   });
 });
 
 //自动生成html模板
 htmlArray.forEach(element => {
   module.exports.plugins.push(
-    new HtmlWebpackPlugin(getHtmlConfig(element._html, element.chunks,element.excludeChunks))
+    new HtmlWebpackPlugin(
+      getHtmlConfig(element._html, element.chunks, element.excludeChunks)
+    )
   );
 });

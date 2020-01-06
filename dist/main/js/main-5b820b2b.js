@@ -205,6 +205,7 @@ __webpack_require__.r(__webpack_exports__);
 function show(content) {
   window.document.getElementById("app").innerText = "Hello，" + content;
 }
+
 /* harmony default export */ __webpack_exports__["default"] = (show);
 
 
