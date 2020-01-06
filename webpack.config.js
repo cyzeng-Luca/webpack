@@ -113,9 +113,10 @@ var getHtmlConfig = function(name, chunks, excludeChunks) {
     // title: title,
     inject: true,
     // hash: true, //开启hash  ?[hash]
-    chunks,
-    // chunks: ["test"],
-    excludeChunks,
+    // chunks,
+    // chunks: ["vendors~main~test"],
+    // excludeChunks,
+    
     minify:
       process.env.NODE_ENV === "development"
         ? false
@@ -123,7 +124,49 @@ var getHtmlConfig = function(name, chunks, excludeChunks) {
             removeComments: true, //移除HTML中的注释
             collapseWhitespace: true, //折叠空白区域 也就是压缩代码
             removeAttributeQuotes: true //去除属性引用
-          }
+          },
+      templateParameters: (compilation, assets, assetTags, options) => { 
+        const chunkOnlyConfig = {
+          assets: false,
+          cached: false,
+          children: false,
+          chunks: true,
+          chunkModules: false,
+          chunkOrigins: false,
+          errorDetails: false,
+          hash: false,
+          modules: false,
+          reasons: false,
+          source: false,
+          timings: false,
+          version: false
+        };
+        
+        const reg = new RegExp(`${name}`);
+        const chunksFilter =  compilation.getStats().toJson(chunkOnlyConfig).chunks.filter(item=> reg.test(item.id));
+        const chunksList = chunksFilter.map(item=> item.id);   
+        console.log(name, chunksList);    
+        let x = {
+          compilation,
+          webpackConfig: compilation.options,
+          htmlWebpackPlugin: {
+            tags: {
+              ...assetTags,
+              chunks:chunksList,
+              excludeChunks:['test']
+            },
+            // tags: assetTags,
+
+            files: assets,
+            options
+          },
+          'foo': 'bar'
+        };
+        console.log('assetTags:', assetTags)
+        console.log('x:', x.htmlWebpackPlugin.tags)
+        return x
+      },
+    
   };
 };
 
